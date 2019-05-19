@@ -5,10 +5,12 @@ require([
   "esri/Graphic",
   "esri/widgets/Home",
   "esri/widgets/Locate"
-], function (
-  Map, MapView,
-  GraphicsLayer, Graphic,
-  Home, Locate) {
+],
+
+  function (
+    Map, MapView,
+    GraphicsLayer, Graphic,
+    Home, Locate) {
 
     var map = new Map({
       basemap: "topo"
@@ -33,25 +35,18 @@ require([
     view.ui.add(homeBtn, "top-left");
     view.ui.add(locateBtn, "top-left");
 
+    // Request URL
     var baseUrl = "https://www.grab.com/sg/wp-json/places/v1/grabpaymex/?region=SG"
     var allowOrigin = "https://api.allorigins.win/raw?url="
     var requestUrl = allowOrigin + baseUrl
 
     fetch(requestUrl)
-      .then(function (response) {
-        if (response.ok) {
-          return response.json();
-        }
-      })
-      .then(function (jsonResponse) {
-        generatePts(jsonResponse[1])
-      })
-      .catch(function () {
-        Error('Network response was not ok.');
-      });
+      .then(response => response.json())
+      .then(jsonResponse => createGraphicsLayer(jsonResponse[1]))
+      .catch(error => console.error('Error:', error));
 
     // Iterate through array to generate point graphics layer
-    generatePts = function (input) {
+    createGraphicsLayer = function (input) {
 
       var layer = new GraphicsLayer;
 
@@ -93,6 +88,7 @@ require([
 
       }
 
+      // Add layer to map
       map.add(layer);
 
     };
