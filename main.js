@@ -3,13 +3,14 @@ require([
   "esri/views/MapView",
   "esri/layers/FeatureLayer",
   "esri/widgets/Home",
-  "esri/widgets/Locate"
+  "esri/widgets/Locate", 
+  "esri/widgets/Legend"
 ],
 
   function (
     Map, MapView,
     FeatureLayer,
-    Home, Locate) {
+    Home, Locate, Legend) {
 
     var map = new Map({
       basemap: "topo"
@@ -30,14 +31,22 @@ require([
       view: view
     });
 
+    var legend = new Legend({
+      view: view
+    }); 
+
+    var featureLayer;
+
     // Add ui buttons to the top left corner of the view
     view.ui.add(homeBtn, "top-left");
     view.ui.add(locateBtn, "top-left");
+    view.ui.add(legend, "bottom-left");
 
     // Request URL
     var baseUrl = "https://www.grab.com/sg/wp-json/places/v1/grabpaymex/?region=SG"
     var allowOrigin = "https://api.allorigins.win/raw?url="
-    var requestUrl = allowOrigin + baseUrl
+    // var requestUrl = allowOrigin + baseUrl
+    var requestUrl = "./data/data.json"
 
     fetch(requestUrl)
       .then(response => response.json())
@@ -46,13 +55,76 @@ require([
       .then(featureLayer => map.add(featureLayer))
       .catch(error => console.error('Error:', error));
 
+    var uniqueValueRenderer = {
+      type: "unique-value",
+      field: "service", 
+      legendOptions: {
+        title: "Service Type"
+      },
+      uniqueValueInfos: [
+        {
+          value: "fnb", 
+          label: "F&B", 
+          symbol: {
+            type: "picture-marker", 
+            url: "./img/icon-fnb.jpg", 
+            width: "32px", 
+            height: "32px"
+          }
+        }, 
+        {
+          value: "retail", 
+          label: "Retail", 
+          symbol: {
+            type: "picture-marker", 
+            url: "./img/icon-retail.jpg", 
+            width: "32px", 
+            height: "32px"
+          }
+        }, 
+        {
+          value: "service", 
+          label: "Services", 
+          symbol: {
+            type: "picture-marker", 
+            url: "./img/icon-service.jpg", 
+            width: "32px", 
+            height: "32px"
+          }
+        }, 
+        {
+          value: "others", 
+          label: "Others",
+          symbol: {
+            type: "picture-marker", 
+            url: "./img/icon-others.jpg", 
+            width: "32px", 
+            height: "32px"
+          }
+        },
+      ]
+    };
+
+    var heatmapRenderer = {
+      type: "heatmap",
+      colorStops: [
+        { ratio: 0, color: "rgba(191, 230, 206, 0)" },
+        { ratio: 0.2, color: "rgba(191, 230, 206, 0.2)" },
+        { ratio: 0.3, color: "rgba(127, 206, 157, 0.4)" },
+        { ratio: 0.4, color: "rgba(63, 181, 108, 0.6)" },
+        { ratio: 1, color: "rgba(0, 157, 59, 0.8)" }
+      ],
+      maxPixelIntensity: 100,
+      minPixelIntensity: 0
+    };
+
     // Iterate through JSON response to create array of features
     createFeatures = function (input) {
 
       var features = [];
 
       for (i = 0; i < input.length; i++) {
-      // for (i = 0; i < 5; i++) {
+        // for (i = 0; i < 5; i++) {
 
         var feature = {};
 
@@ -81,28 +153,17 @@ require([
           feature.attributes.service = "others"
         }
 
+        // Adding a count field for heatmap renderer to work
+        feature.attributes.count = 1;
+
         features.push(feature);
       }
 
       return features
-
     };
 
     // Create feature layer from features array
     createFeatureLayer = function (features) {
-
-      var renderer = {
-        type: "simple",  // autocasts as new SimpleRenderer()
-        symbol: {
-          type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-          size: 6,
-          color: [0, 157, 59, 0.8],
-          outline: {  // autocasts as new SimpleLineSymbol()
-            width: 0.5,
-            color: "white"
-          }
-        }
-      };
 
       var popupTemplate = {
         title: "{mex_trading_name}",
@@ -149,22 +210,32 @@ require([
           alias: "website",
           type: "string"
         },
+        {
+          name: "count",
+          alias: "count",
+          type: "integer"
+        }
       ];
 
-      var featureLayer = new FeatureLayer({
+      featureLayer = new FeatureLayer({
 
-        // create an instance of esri/layers/support/Field for each field object
+        title: "GrabPay Merchants",
         fields: fields,
         objectIdField: "id",
         geometryType: "point",
         spatialReference: { wkid: 4326 },
         source: features,
         popupTemplate: popupTemplate,
-        renderer: renderer,
+        renderer: heatmapRenderer,
       });
 
       return featureLayer
-
     };
+
+    // Listen for change, change renderer by scale value
+    view.watch("scale", function (scale) {
+      featureLayer.renderer =
+        scale <= 30000 ? uniqueValueRenderer : heatmapRenderer
+    });
 
   });
