@@ -35,12 +35,12 @@ require([
       view: view
     }); 
 
-    var featureLayer;
-
     // Add ui buttons to the top left corner of the view
     view.ui.add(homeBtn, "top-left");
     view.ui.add(locateBtn, "top-left");
     view.ui.add(legend, "bottom-left");
+
+    var featureLayer;
 
     // Request URL
     var baseUrl = "https://www.grab.com/sg/wp-json/places/v1/grabpaymex/?region=SG"
