@@ -1,26 +1,34 @@
 require([
   "esri/Map",
+  "esri/Viewpoint",
   "esri/views/MapView",
   "esri/layers/FeatureLayer",
   "esri/widgets/Home",
-  "esri/widgets/Locate", 
+  "esri/widgets/Locate",
   "esri/widgets/Legend"
 ],
 
   function (
-    Map, MapView,
+    Map, Viewpoint, MapView,
     FeatureLayer,
     Home, Locate, Legend) {
 
+    // ==================================
+    // Create map and UI components
+    // ==================================
+
     var map = new Map({
-      basemap: "topo"
+      basemap: "gray-vector"
     });
 
     var view = new MapView({
       container: "viewDiv",
+      padding: {
+        top: 50
+      },
       map: map,
-      zoom: 12,
-      center: [103.8198, 1.3521]
+      // zoom: 12,
+      // center: [103.8198, 1.3521]
     });
 
     var homeBtn = new Home({
@@ -33,12 +41,16 @@ require([
 
     var legend = new Legend({
       view: view
-    }); 
+    });
 
     // Add ui buttons to the top left corner of the view
     view.ui.add(homeBtn, "top-left");
     view.ui.add(locateBtn, "top-left");
     view.ui.add(legend, "bottom-left");
+
+    // ==================================
+    // Get data and create layer
+    // ==================================
 
     var featureLayer;
 
@@ -57,48 +69,48 @@ require([
 
     var uniqueValueRenderer = {
       type: "unique-value",
-      field: "service", 
+      field: "service",
       legendOptions: {
         title: "Service Type"
       },
       uniqueValueInfos: [
         {
-          value: "fnb", 
-          label: "F&B", 
+          value: "fnb",
+          label: "F&B",
           symbol: {
-            type: "picture-marker", 
-            url: "./img/icon-fnb.jpg", 
-            width: "32px", 
+            type: "picture-marker",
+            url: "./img/icon-fnb.jpg",
+            width: "32px",
             height: "32px"
           }
-        }, 
+        },
         {
-          value: "retail", 
-          label: "Retail", 
+          value: "retail",
+          label: "Retail",
           symbol: {
-            type: "picture-marker", 
-            url: "./img/icon-retail.jpg", 
-            width: "32px", 
+            type: "picture-marker",
+            url: "./img/icon-retail.jpg",
+            width: "32px",
             height: "32px"
           }
-        }, 
+        },
         {
-          value: "service", 
-          label: "Services", 
+          value: "service",
+          label: "Services",
           symbol: {
-            type: "picture-marker", 
-            url: "./img/icon-service.jpg", 
-            width: "32px", 
+            type: "picture-marker",
+            url: "./img/icon-service.jpg",
+            width: "32px",
             height: "32px"
           }
-        }, 
+        },
         {
-          value: "others", 
+          value: "others",
           label: "Others",
           symbol: {
-            type: "picture-marker", 
-            url: "./img/icon-others.jpg", 
-            width: "32px", 
+            type: "picture-marker",
+            url: "./img/icon-others.jpg",
+            width: "32px",
             height: "32px"
           }
         },
@@ -232,10 +244,78 @@ require([
       return featureLayer
     };
 
+    // ==================================
+    // Listen for events
+    // ==================================
+
     // Listen for change, change renderer by scale value
     view.watch("scale", function (scale) {
       featureLayer.renderer =
         scale <= 30000 ? uniqueValueRenderer : heatmapRenderer
     });
+
+    // When layer is loaded
+    view
+      .when(function (view) {
+        featureLayer.when(function (layer) {
+          view.extent = layer.fullExtent;
+          homeBtn.viewpoint = layer.fullExtent;
+        });
+        view.whenLayerView(featureLayer)
+          .then(function (layerView) {
+            layerView.watch("updating", function (value) {
+              if (!value) {
+                layerView
+                  .queryFeatures({
+                    geometry: view.extent
+                  })
+                  .then(function(results){
+                    console.log(results);
+                    console.log(results.features.length);
+                    document.getElementById("contentField").innerHTML = results.features.length;
+                  })
+              }
+            })
+          })
+      })
+
+    // ==================================
+    // Mobile UI
+    // ==================================
+
+    updateView(view.width < 750);
+
+    view.watch("widthBreakpoint", function (breakpoint) {
+      switch (breakpoint) {
+        case "xsmall":
+        case "small":
+          updateView(true);
+          break;
+        case "medium":
+        case "large":
+        case "xlarge":
+          updateView(false);
+          break;
+        default:
+      }
+    });
+
+    function updateView(isMobileView) {
+      if (isMobileView) {
+        document.getElementById("viewDiv").style.height = "50%";
+        document.getElementById("contentDiv").style.width = "100%";
+        document.getElementById("contentDiv").style.height = "50%";
+        document.getElementById("contentDiv").style.position = "relative";
+        document.getElementById("contentDiv").style.paddingTop = "15px";
+        view.ui.remove(legend);
+      }
+      else {
+        document.getElementById("viewDiv").style.height = "100%";
+        document.getElementById("contentDiv").style.width = "30%";
+        document.getElementById("contentDiv").style.height = "100%";
+        document.getElementById("contentDiv").style.position = "absolute";
+        view.ui.add(legend, "bottom-left");
+      }
+    }
 
   });

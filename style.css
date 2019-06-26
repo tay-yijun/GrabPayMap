@@ -1,0 +1,60 @@
+html,
+    body,
+
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    #titleDiv {
+      position: absolute;
+      /* height: 55px; */
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      background: #FFFFFF;
+      z-index: 100;
+    }
+
+    #title {
+      margin: 10px;
+      font-size: 20px;
+      overflow: hidden;
+    }
+
+    img {
+        vertical-align: bottom;
+        height: 30px;
+    }
+
+    a {
+        text-decoration: none
+    }
+
+    span {
+        vertical-align: text-bottom;
+    }
+
+    body {
+      background-color: #FFFFFF;
+      font-family: 'Times New Roman', Times, serif
+    }
+
+    #contentDiv {
+      position: absolute;
+      top: 0;
+      right: 0;
+      min-width: 300px;
+      width: 30%;
+      max-height: 100%;
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5em;
+      line-height: 1.8em;
+      overflow-y: auto;
+      box-sizing: border-box;
+      opacity: 0.8;
+      padding-top: 55px;
+    }

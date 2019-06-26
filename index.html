@@ -5,25 +5,39 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>GrabPay Map</title>
-  <style>
-    html,
-    body,
-    #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      width: 100%;
-    }
-  </style>
 
   <link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/themes/light/main.css" />
   <script src="https://js.arcgis.com/4.11/"></script>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
   <script src="main.js"></script>
 
 </head>
 
 <body>
+
+  <!-- title panel -->
+  <div id="titleDiv">
+    <div id="title">
+      <span>
+          <a href="https://www.grab.com/sg/grabpay/" target="_blank">
+            <img src="img/grabpay_topnav.png" onmouseover="this.src='img/grabpay_topnav_active.png'"
+              onmouseout="this.src='./img/grabpay_topnav.png'" alt="GrabPay Logo">
+          </a>
+          <span> | Explore Merchants</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- map panel -->
   <div id="viewDiv"></div>
+
+  <!-- content panel -->
+  <div id="contentDiv">
+    <label>Number of Merchants: </label>
+    <div id="contentField"></div>
+  </div>
+
 </body>
 
 </html>
