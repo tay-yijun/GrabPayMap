@@ -10,7 +10,6 @@ html,
 
     #titleDiv {
       position: absolute;
-      /* height: 55px; */
       width: 100%;
       display: flex;
       justify-content: space-between;
@@ -39,7 +38,7 @@ html,
 
     body {
       background-color: #FFFFFF;
-      font-family: 'Times New Roman', Times, serif
+      font-family: 'Sanomat Grab Web Regular', sans-serif;
     }
 
     #contentDiv {
@@ -51,10 +50,11 @@ html,
       max-height: 100%;
       background-color: #FFFFFF;
       color: #000000;
-      padding: 2.5em;
+      padding: 2em;
       line-height: 1.8em;
       overflow-y: auto;
       box-sizing: border-box;
-      opacity: 0.8;
-      padding-top: 55px;
+      /* opacity: 0.8; */
+      /* padding-top: 55px; */
+      z-index: 100;
     }

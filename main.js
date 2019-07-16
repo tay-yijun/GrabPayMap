@@ -27,8 +27,8 @@ require([
         top: 50
       },
       map: map,
-      // zoom: 12,
-      // center: [103.8198, 1.3521]
+      zoom: 11,
+      center: [103.9218778181134, 1.325482651727095]
     });
 
     var homeBtn = new Home({
@@ -255,29 +255,39 @@ require([
     });
 
     // When layer is loaded
-    view
-      .when(function (view) {
-        featureLayer.when(function (layer) {
-          view.extent = layer.fullExtent;
-          homeBtn.viewpoint = layer.fullExtent;
-        });
-        view.whenLayerView(featureLayer)
-          .then(function (layerView) {
-            layerView.watch("updating", function (value) {
-              if (!value) {
-                layerView
-                  .queryFeatures({
-                    geometry: view.extent
-                  })
-                  .then(function(results){
-                    console.log(results);
-                    console.log(results.features.length);
-                    document.getElementById("contentField").innerHTML = results.features.length;
-                  })
-              }
+    view.when(function (view) {
+      view.whenLayerView(featureLayer).then(function (layerView) {
+        layerView.watch("updating", function (value) {
+          if (!value) {
+            layerView.queryFeatures({
+              geometry: view.extent
             })
-          })
+              .then(function (results) {
+                console.log(results);
+
+                // Return and display feature count
+                count = results.features.length; 
+                document.getElementById("contentField").innerHTML = `<font color='#009D3B'>${count}</font> <hr>`;
+
+                // Create a div DOM for each feature
+                for (i = 0; i < count; i++) {
+                  
+                  merchant = results.features[i].attributes.mex_trading_name
+                  address = results.features[i].attributes.address
+                  divContent = `<b>${merchant}</b> <br> ${address} <hr>`;
+
+                  div = document.createElement("div");
+                  div.innerHTML = divContent;                  
+
+                  document.getElementById("contentField").appendChild(div);
+
+                }
+
+              })
+          }
+        })
       })
+    })
 
     // ==================================
     // Mobile UI
@@ -306,13 +316,14 @@ require([
         document.getElementById("contentDiv").style.width = "100%";
         document.getElementById("contentDiv").style.height = "50%";
         document.getElementById("contentDiv").style.position = "relative";
-        document.getElementById("contentDiv").style.paddingTop = "15px";
+        // document.getElementById("contentDiv").style.paddingTop = "15px";
         view.ui.remove(legend);
       }
       else {
         document.getElementById("viewDiv").style.height = "100%";
         document.getElementById("contentDiv").style.width = "30%";
-        document.getElementById("contentDiv").style.height = "100%";
+        document.getElementById("contentDiv").style.height = "95%";
+        document.getElementById("contentDiv").style.top = "5%";
         document.getElementById("contentDiv").style.position = "absolute";
         view.ui.add(legend, "bottom-left");
       }
