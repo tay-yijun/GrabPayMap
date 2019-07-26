@@ -267,17 +267,23 @@ require([
 
                 // Return and display feature count
                 count = results.features.length; 
-                document.getElementById("contentField").innerHTML = `<font color='#009D3B'>${count}</font> <hr>`;
+                document.getElementById("contentField").innerHTML = `<i>Number of Merchants: ${count} </i> <hr>`;
 
                 // Create a div DOM for each feature
                 for (i = 0; i < count; i++) {
                   
                   merchant = results.features[i].attributes.mex_trading_name
                   address = results.features[i].attributes.address
-                  divContent = `<b>${merchant}</b> <br> ${address} <hr>`;
+                  
+                  divContent = `<b><font color='#009D3B'>${merchant}</font></b> <br> ${address} <hr>`;
 
                   div = document.createElement("div");
-                  div.innerHTML = divContent;                  
+                  div.innerHTML = divContent;
+                  div.classList.add("container");        
+
+                  div.addEventListener("click", function(e) {
+                    console.log("click!");
+                  });
 
                   document.getElementById("contentField").appendChild(div);
 
@@ -288,6 +294,14 @@ require([
         })
       })
     })
+
+    function addHighlight(target) {
+      target.classList.add('highlighted');
+    }
+
+    function removeHighlight(target) {
+      target.classList.remove('highlighted');
+    }
 
     // ==================================
     // Mobile UI
